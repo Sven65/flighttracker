@@ -79,7 +79,7 @@
       <div class="search-select" data-search-select data-search-url="/carriers/search" data-debounce="250" data-min-chars="1">
         <input type="text" id="carrierSearch" data-role="search-input" autocomplete="off"
                value="<%= flight.carrier_name || '' %>" placeholder="Search carriers">
-        <input type="hidden" name="carrierId" data-role="hidden-value" value="<%= flight.carrier_id || '' %>">
+        <input type="hidden" id="carrierId" name="carrierId" data-role="hidden-value" value="<%= flight.carrier_id || '' %>">
         <ul class="search-select__results" data-role="results" hidden></ul>
       </div>
       <p class="muted" style="font-size:0.85rem;">Don't see it? <a href="/carriers/new">Add a carrier</a> first.</p>
@@ -89,7 +89,7 @@
       <div class="search-select" data-search-select data-search-url="/aircraft/search" data-debounce="250" data-min-chars="1">
         <input type="text" id="aircraftSearch" data-role="search-input" autocomplete="off"
                value="<%= [flight.aircraft_manufacturer, flight.aircraft_model].filter(Boolean).join(' ') %>" placeholder="Search aircraft">
-        <input type="hidden" name="aircraftId" data-role="hidden-value" value="<%= flight.aircraft_id || '' %>">
+        <input type="hidden" id="aircraftId" name="aircraftId" data-role="hidden-value" value="<%= flight.aircraft_id || '' %>">
         <ul class="search-select__results" data-role="results" hidden></ul>
       </div>
       <p class="muted" style="font-size:0.85rem;">Don't see it? <a href="/aircraft/new">Add an aircraft</a> first.</p>
