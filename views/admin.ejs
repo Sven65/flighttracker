@@ -1,0 +1,31 @@
+<% var title = 'Admin' %>
+<%- include('partials/header', { title: title }) %>
+<h1>Admin</h1>
+<% if (error) { %><div class="error-banner"><%= error %></div><% } %>
+
+<table>
+  <thead>
+    <tr><th>Username</th><th>Admin</th><th>Invites left</th><th>Invited (used/created)</th><th>Grant more</th></tr>
+  </thead>
+  <tbody>
+    <% users.forEach(function(u) { %>
+      <tr>
+        <td><%= u.username %></td>
+        <td><%= u.is_admin === 1 ? 'Yes' : '—' %></td>
+        <td><%= u.is_admin === 1 ? 'Unlimited' : u.invites_remaining %></td>
+        <td><%= u.invites_used %> / <%= u.invites_created %></td>
+        <td>
+          <% if (u.is_admin !== 1) { %>
+            <form action="/admin/grant-invites" method="POST" style="display:flex; gap:6px; align-items:center;">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="userId" value="<%= u.id %>">
+              <input type="number" name="amount" min="1" value="5" style="width:70px;">
+              <button class="btn secondary small" type="submit">Grant</button>
+            </form>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('partials/footer') %>

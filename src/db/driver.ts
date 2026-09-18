@@ -14,6 +14,9 @@ import type {
   Airport,
   AirportInput,
   FlightRoute,
+  InviteCode,
+  InviteCodeWithUsage,
+  UserWithInviteStats,
 } from '../types/models';
 
 /**
@@ -36,6 +39,17 @@ export abstract class Driver {
   /** Throws on a duplicate email (the column is UNIQUE) - callers should catch and show a friendly message. */
   abstract updateUserEmail(userId: number, email: string | null): Promise<User | null>;
   abstract updateUserPassword(userId: number, passwordHash: string): Promise<void>;
+  abstract countUsers(): Promise<number>;
+  abstract listAllUsersForAdmin(): Promise<UserWithInviteStats[]>;
+
+  // ---- invite codes ----------------------------------------------------
+  abstract createInviteCode(userId: number, code: string): Promise<void>;
+  abstract getInviteCode(code: string): Promise<InviteCode | null>;
+  abstract markInviteCodeUsed(code: string, usedByUserId: number): Promise<void>;
+  abstract listInviteCodesCreatedBy(userId: number): Promise<InviteCodeWithUsage[]>;
+  /** No-ops if invites_remaining is already 0 - never goes negative. */
+  abstract decrementInvites(userId: number): Promise<void>;
+  abstract grantInvites(userId: number, amount: number): Promise<void>;
 
   // ---- carriers (airlines) ------------------------------------------
   /** Always creates the row owned by userId - there is no user-facing way to add a shared default. */

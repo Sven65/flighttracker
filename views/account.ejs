@@ -9,6 +9,50 @@
 </div>
 
 <div class="card">
+  <h2>Invites</h2>
+  <p>
+    <% if (user.is_admin === 1) { %>
+      You have unlimited invites (admin).
+    <% } else { %>
+      You have <strong><%= user.invites_remaining %></strong> invite<%= user.invites_remaining === 1 ? '' : 's' %> left.
+    <% } %>
+  </p>
+
+  <% if (inviteError) { %><div class="error-banner"><%= inviteError %></div><% } %>
+  <% if (newInviteCode) { %>
+    <p class="highlight-line" style="color: var(--success);">New code: <strong><%= newInviteCode %></strong> — share it with whoever you're inviting. It only works once.</p>
+  <% } %>
+
+  <form action="/account/invites" method="POST" style="margin-bottom:20px;">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <button class="btn" type="submit" <% if (user.is_admin !== 1 && user.invites_remaining <= 0) { %>disabled<% } %>>Generate invite code</button>
+  </form>
+
+  <% if (invites.length === 0) { %>
+    <p class="empty-state">You haven't invited anyone yet.</p>
+  <% } else { %>
+    <table>
+      <thead><tr><th>Code</th><th>Status</th><th>Created</th></tr></thead>
+      <tbody>
+        <% invites.forEach(function(inv) { %>
+          <tr>
+            <td><%= inv.code %></td>
+            <td>
+              <% if (inv.used_by) { %>
+                <span class="badge badge-custom">Used by <%= inv.used_by_username %></span>
+              <% } else { %>
+                <span class="badge">Unused</span>
+              <% } %>
+            </td>
+            <td><%= inv.created_at %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<div class="card">
   <h2>Email</h2>
   <% if (emailError) { %><div class="error-banner"><%= emailError %></div><% } %>
   <form class="stacked" action="/account/email" method="POST">

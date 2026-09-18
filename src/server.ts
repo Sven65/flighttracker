@@ -14,6 +14,7 @@ import carrierRoutes from './routes/carrierRoutes';
 import aircraftRoutes from './routes/aircraftRoutes';
 import airportRoutes from './routes/airportRoutes';
 import accountRoutes from './routes/accountRoutes';
+import adminRoutes from './routes/adminRoutes';
 
 const SQLiteStore = connectSqlite3(session);
 
@@ -24,8 +25,7 @@ async function main(): Promise<void> {
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, '..', 'views'));
 
-  // Required for rate limiting / secure cookies to see the real client
-  // behind a reverse proxy - only enable if one is actually in front.
+  // Needed behind a reverse proxy for rate limiting / secure cookies.
   const trustProxy = process.env.TRUST_PROXY === 'true';
   if (trustProxy) {
     app.set('trust proxy', 1);
@@ -63,6 +63,7 @@ async function main(): Promise<void> {
   app.use('/aircraft', aircraftRoutes(db));
   app.use('/airports', airportRoutes(db));
   app.use('/account', accountRoutes(db));
+  app.use('/admin', adminRoutes(db));
 
   app.get('/', requireAuth, async (req, res) => {
     const [stats, recentFlights, flightRoutes] = await Promise.all([

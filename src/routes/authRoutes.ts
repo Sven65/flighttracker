@@ -2,17 +2,16 @@ import express, { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { redirectIfAuthed } from '../middleware/auth';
 import { loginLimiter, registerLimiter } from '../middleware/rateLimit';
-import { safeCompare } from '../utils/safeCompare';
 import type { Driver } from '../db/driver';
 
 export default function authRoutes(db: Driver): Router {
   const router = express.Router();
   const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);
-  const inviteCode = process.env.INVITE_CODE || '';
-  const inviteRequired = inviteCode.length > 0;
+  const requireInvite = process.env.REQUIRE_INVITE !== 'false';
 
-  router.get('/register', redirectIfAuthed, (req, res) => {
-    res.render('register', { error: null, username: '', inviteRequired });
+  router.get('/register', redirectIfAuthed, async (req, res) => {
+    const userCount = await db.countUsers();
+    res.render('register', { error: null, username: '', inviteRequired: requireInvite && userCount > 0 });
   });
 
   router.post('/register', redirectIfAuthed, registerLimiter, async (req, res) => {
@@ -20,11 +19,27 @@ export default function authRoutes(db: Driver): Router {
     const email = (req.body.email || '').trim();
     const password = req.body.password || '';
     const passwordConfirm = req.body.passwordConfirm || '';
-    const submittedInvite = req.body.inviteCode || '';
+    const submittedCode = (req.body.inviteCode || '').trim().toUpperCase();
 
-    if (inviteRequired && !safeCompare(submittedInvite, inviteCode)) {
-      res.render('register', { error: 'Invalid invite code.', username, inviteRequired });
-      return;
+    const userCount = await db.countUsers();
+    const inviteRequired = requireInvite && userCount > 0;
+
+    // First-ever account bootstraps as admin with no code needed.
+    let invite = null;
+    if (inviteRequired) {
+      if (!submittedCode) {
+        res.render('register', { error: 'An invite code is required.', username, inviteRequired });
+        return;
+      }
+      invite = await db.getInviteCode(submittedCode);
+      if (!invite || invite.used_by) {
+        res.render('register', {
+          error: 'That invite code is invalid or already used.',
+          username,
+          inviteRequired,
+        });
+        return;
+      }
     }
 
     if (!username || !password) {
@@ -55,7 +70,16 @@ export default function authRoutes(db: Driver): Router {
     }
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const user = await db.createUser({ username, email: email || null, passwordHash });
+    const user = await db.createUser({
+      username,
+      email: email || null,
+      passwordHash,
+      isAdmin: userCount === 0,
+    });
+
+    if (invite) {
+      await db.markInviteCodeUsed(invite.code, user.id);
+    }
 
     req.session.userId = user.id;
     res.redirect('/');
@@ -70,8 +94,7 @@ export default function authRoutes(db: Driver): Router {
     const password = req.body.password || '';
 
     const user = await db.getUserByUsername(username);
-    // Always run bcrypt.compare (even with a dummy hash) so responses for
-    // "no such user" and "wrong password" take the same amount of time.
+    // Constant-time either way, so "no such user" and "wrong password" look identical.
     const hashToCheck = user ? user.password_hash : '$2a$12$invalidsaltinvalidsaltinvalidsal';
     const ok = await bcrypt.compare(password, hashToCheck);
 

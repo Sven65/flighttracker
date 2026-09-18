@@ -11,3 +11,6 @@ CREATE INDEX IF NOT EXISTS idx_flights_aircraft ON flights(aircraft_id);
 CREATE INDEX IF NOT EXISTS idx_airports_name ON airports(name);
 CREATE INDEX IF NOT EXISTS idx_airports_iata ON airports(iata_code);
 CREATE INDEX IF NOT EXISTS idx_airports_user ON airports(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_invite_codes_created_by ON invite_codes(created_by);
+CREATE INDEX IF NOT EXISTS idx_invite_codes_used_by ON invite_codes(used_by);

@@ -10,7 +10,31 @@ export interface User {
   username: string;
   email: string | null;
   password_hash: string;
+  is_admin: 0 | 1;
+  invites_remaining: number;
   created_at: string;
+}
+
+export interface InviteCode {
+  code: string;
+  created_by: number;
+  used_by: number | null;
+  created_at: string;
+  used_at: string | null;
+}
+
+export interface InviteCodeWithUsage extends InviteCode {
+  used_by_username: string | null;
+}
+
+export interface UserWithInviteStats {
+  id: number;
+  username: string;
+  is_admin: 0 | 1;
+  invites_remaining: number;
+  created_at: string;
+  invites_created: number;
+  invites_used: number;
 }
 
 /** user_id is null for the shared, seeded defaults; set for a user's own entry. */
@@ -145,6 +169,7 @@ export interface CreateUserInput {
   username: string;
   email: string | null;
   passwordHash: string;
+  isAdmin?: boolean;
 }
 
 export interface CarrierInput {

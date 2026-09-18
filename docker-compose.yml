@@ -12,8 +12,8 @@ services:
       SESSION_SECRET: change-this-to-something-long-and-random
       PORT: 3000
       BCRYPT_SALT_ROUNDS: 12
-      # Set before going public - see .env.example
-      INVITE_CODE: ""
+      # See .env.example
+      REQUIRE_INVITE: "true"
       TRUST_PROXY: "false"
       # Optional - see .env.example
       AERODATABOX_API_KEY: ""

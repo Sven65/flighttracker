@@ -22,6 +22,9 @@ import type {
   Airport,
   AirportInput,
   FlightRoute,
+  InviteCode,
+  InviteCodeWithUsage,
+  UserWithInviteStats,
 } from '../types/models';
 
 export interface SqliteDriverOptions {
@@ -46,8 +49,7 @@ export class SqliteDriver extends Driver {
     const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
     this.db.exec(schema);
 
-    // Migrate pre-ownership-model DBs; backfill existing rows to the
-    // first account since seeding didn't exist before this.
+    // Pre-ownership-model DBs: backfill existing rows to the first account.
     const carriersJustMigrated = this.ensureColumn(
       'carriers',
       'user_id',
@@ -70,6 +72,12 @@ export class SqliteDriver extends Driver {
     this.ensureColumn('flights', 'duration_minutes', 'INTEGER');
     this.ensureColumn('flights', 'diverted_to', 'TEXT');
 
+    const adminJustMigrated = this.ensureColumn('users', 'is_admin', 'INTEGER NOT NULL DEFAULT 0');
+    this.ensureColumn('users', 'invites_remaining', 'INTEGER NOT NULL DEFAULT 5');
+    if (adminJustMigrated) {
+      this.db.exec('UPDATE users SET is_admin = 1 WHERE id = (SELECT MIN(id) FROM users)');
+    }
+
     const indexes = fs.readFileSync(path.join(__dirname, 'indexes.sql'), 'utf8');
     this.db.exec(indexes);
   }
@@ -87,11 +95,11 @@ export class SqliteDriver extends Driver {
   }
 
   // ---- users -------------------------------------------------------
-  async createUser({ username, email, passwordHash }: CreateUserInput): Promise<User> {
+  async createUser({ username, email, passwordHash, isAdmin }: CreateUserInput): Promise<User> {
     const stmt = this.db.prepare(
-      'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)'
+      'INSERT INTO users (username, email, password_hash, is_admin) VALUES (?, ?, ?, ?)'
     );
-    const info = stmt.run(username, email || null, passwordHash);
+    const info = stmt.run(username, email || null, passwordHash, isAdmin ? 1 : 0);
     const user = await this.getUserById(info.lastInsertRowid as number);
     if (!user) throw new Error('Failed to create user');
     return user;
@@ -114,6 +122,65 @@ export class SqliteDriver extends Driver {
 
   async updateUserPassword(userId: number, passwordHash: string): Promise<void> {
     this.db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, userId);
+  }
+
+  async countUsers(): Promise<number> {
+    const row = this.db.prepare('SELECT COUNT(*) AS count FROM users').get() as { count: number };
+    return row.count;
+  }
+
+  async listAllUsersForAdmin(): Promise<UserWithInviteStats[]> {
+    return this.db
+      .prepare(
+        `SELECT
+           u.id, u.username, u.is_admin, u.invites_remaining, u.created_at,
+           (SELECT COUNT(*) FROM invite_codes WHERE created_by = u.id) AS invites_created,
+           (SELECT COUNT(*) FROM invite_codes WHERE created_by = u.id AND used_by IS NOT NULL) AS invites_used
+         FROM users u
+         ORDER BY u.id ASC`
+      )
+      .all() as UserWithInviteStats[];
+  }
+
+  // ---- invite codes ----------------------------------------------------
+  async createInviteCode(userId: number, code: string): Promise<void> {
+    this.db.prepare('INSERT INTO invite_codes (code, created_by) VALUES (?, ?)').run(code, userId);
+  }
+
+  async getInviteCode(code: string): Promise<InviteCode | null> {
+    return (
+      (this.db.prepare('SELECT * FROM invite_codes WHERE code = ?').get(code) as
+        | InviteCode
+        | undefined) ?? null
+    );
+  }
+
+  async markInviteCodeUsed(code: string, usedByUserId: number): Promise<void> {
+    this.db
+      .prepare("UPDATE invite_codes SET used_by = ?, used_at = datetime('now') WHERE code = ?")
+      .run(usedByUserId, code);
+  }
+
+  async listInviteCodesCreatedBy(userId: number): Promise<InviteCodeWithUsage[]> {
+    return this.db
+      .prepare(
+        `SELECT ic.*, u.username AS used_by_username
+         FROM invite_codes ic
+         LEFT JOIN users u ON u.id = ic.used_by
+         WHERE ic.created_by = ?
+         ORDER BY ic.created_at DESC`
+      )
+      .all(userId) as InviteCodeWithUsage[];
+  }
+
+  async decrementInvites(userId: number): Promise<void> {
+    this.db
+      .prepare('UPDATE users SET invites_remaining = invites_remaining - 1 WHERE id = ? AND invites_remaining > 0')
+      .run(userId);
+  }
+
+  async grantInvites(userId: number, amount: number): Promise<void> {
+    this.db.prepare('UPDATE users SET invites_remaining = invites_remaining + ? WHERE id = ?').run(amount, userId);
   }
 
   // ---- carriers ------------------------------------------------------

@@ -1,9 +1,19 @@
 CREATE TABLE IF NOT EXISTS users (
-  id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  username      TEXT NOT NULL UNIQUE,
-  email         TEXT UNIQUE,
-  password_hash TEXT NOT NULL,
-  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  username          TEXT NOT NULL UNIQUE,
+  email             TEXT UNIQUE,
+  password_hash     TEXT NOT NULL,
+  is_admin          INTEGER NOT NULL DEFAULT 0,
+  invites_remaining INTEGER NOT NULL DEFAULT 5,
+  created_at        TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS invite_codes (
+  code       TEXT PRIMARY KEY,
+  created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  used_by    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  used_at    TEXT
 );
 
 -- user_id NULL = a shared default (seeded), visible to everyone but not

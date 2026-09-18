@@ -17,6 +17,7 @@
         <a href="/carriers">Carriers</a>
         <a href="/aircraft">Aircraft</a>
         <a href="/airports">Airports</a>
+        <% if (currentUser.is_admin === 1) { %><a href="/admin">Admin</a><% } %>
       </nav>
       <form action="/logout" method="POST" class="logout-form">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">

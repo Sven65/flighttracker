@@ -3,8 +3,7 @@ import { Driver } from './driver';
 import { SqliteDriver } from './sqliteDriver';
 import { seedIfEmpty } from './seed';
 
-// Map of driver name -> factory function returning a ready-to-init() instance.
-// To add a new backend, add an entry here (and see driver.ts for the contract).
+// Name -> factory. To add a backend, add an entry and implement Driver.
 const DRIVERS: Record<string, () => Driver> = {
   sqlite: () =>
     new SqliteDriver({
