@@ -1,0 +1,43 @@
+<% var title = 'Add custom airport' %>
+<%- include('../partials/header', { title: title }) %>
+<h1>Add custom airport</h1>
+<% if (error) { %><div class="error-banner"><%= error %></div><% } %>
+
+<form class="stacked" action="/airports" method="POST">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="two-col">
+    <div>
+      <label for="icaoCode">ICAO code</label>
+      <input type="text" id="icaoCode" name="icaoCode" value="<%= airport.icaoCode || '' %>" placeholder="e.g. ESKN" maxlength="4" required autofocus>
+    </div>
+    <div>
+      <label for="iataCode">IATA code (optional)</label>
+      <input type="text" id="iataCode" name="iataCode" value="<%= airport.iataCode || '' %>" placeholder="e.g. NYO" maxlength="3">
+    </div>
+  </div>
+
+  <label for="name">Name</label>
+  <input type="text" id="name" name="name" value="<%= airport.name || '' %>" placeholder="e.g. Stockholm Skavsta Airport" required>
+
+  <div class="two-col">
+    <div>
+      <label for="municipality">Municipality (optional)</label>
+      <input type="text" id="municipality" name="municipality" value="<%= airport.municipality || '' %>" placeholder="e.g. Nyköping">
+    </div>
+    <div>
+      <label for="countryCode">Country code (optional)</label>
+      <input type="text" id="countryCode" name="countryCode" value="<%= airport.countryCode || '' %>" placeholder="e.g. SE" maxlength="2">
+    </div>
+  </div>
+
+  <p class="muted" style="font-size:0.85rem;">
+    Coordinates aren't collected here, so a custom airport won't appear on the map or count toward
+    distance stats yet — it'll still work fine for logging flights and searching by name or code.
+  </p>
+
+  <div class="form-actions">
+    <button class="btn" type="submit">Add airport</button>
+    <a class="btn secondary" href="/airports">Cancel</a>
+  </div>
+</form>
+<%- include('../partials/footer') %>

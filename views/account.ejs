@@ -1,0 +1,44 @@
+<% var title = 'Account' %>
+<%- include('partials/header', { title: title }) %>
+<h1>Account</h1>
+
+<div class="card">
+  <h2>Profile</h2>
+  <p><strong>Username:</strong> <%= user.username %></p>
+  <p class="muted" style="font-size:0.85rem;">Usernames can't be changed.</p>
+</div>
+
+<div class="card">
+  <h2>Email</h2>
+  <% if (emailError) { %><div class="error-banner"><%= emailError %></div><% } %>
+  <form class="stacked" action="/account/email" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label for="email">Email (optional)</label>
+    <input type="email" id="email" name="email" value="<%= user.email || '' %>">
+    <div class="form-actions">
+      <button class="btn" type="submit">Save email</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Change password</h2>
+  <% if (passwordError) { %><div class="error-banner"><%= passwordError %></div><% } %>
+  <% if (passwordSuccess) { %><p class="highlight-line" style="color: var(--success);">Password updated.</p><% } %>
+  <form class="stacked" action="/account/password" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label for="currentPassword">Current password</label>
+    <input type="password" id="currentPassword" name="currentPassword" required>
+
+    <label for="newPassword">New password</label>
+    <input type="password" id="newPassword" name="newPassword" required minlength="8">
+
+    <label for="newPasswordConfirm">Confirm new password</label>
+    <input type="password" id="newPasswordConfirm" name="newPasswordConfirm" required minlength="8">
+
+    <div class="form-actions">
+      <button class="btn" type="submit">Change password</button>
+    </div>
+  </form>
+</div>
+<%- include('partials/footer') %>

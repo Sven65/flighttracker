@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' · Flighttracker' : 'Flighttracker' %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <% if (typeof extraHead !== 'undefined') { %><%- extraHead %><% } %>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">✈️ Flighttracker</a>
+    <% if (currentUser) { %>
+      <nav class="topnav">
+        <a href="/">Dashboard</a>
+        <a href="/flights">Flights</a>
+        <a href="/carriers">Carriers</a>
+        <a href="/aircraft">Aircraft</a>
+        <a href="/airports">Airports</a>
+      </nav>
+      <form action="/logout" method="POST" class="logout-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <a href="/account" class="who">@<%= currentUser.username %></a>
+        <button type="submit" class="btn secondary small">Log out</button>
+      </form>
+    <% } %>
+  </header>
+  <main class="container">

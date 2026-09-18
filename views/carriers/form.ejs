@@ -1,0 +1,30 @@
+<% var title = isEdit ? 'Edit carrier' : 'Add carrier' %>
+<%- include('../partials/header', { title: title }) %>
+<h1><%= title %></h1>
+<% if (error) { %><div class="error-banner"><%= error %></div><% } %>
+
+<form class="stacked" action="<%= isEdit ? '/carriers/' + carrier.id : '/carriers' %>" method="POST">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <label for="name">Name</label>
+  <input type="text" id="name" name="name" value="<%= carrier.name || '' %>" placeholder="e.g. Scandinavian Airlines" required autofocus>
+
+  <div class="two-col">
+    <div>
+      <label for="iataCode">IATA code</label>
+      <input type="text" id="iataCode" name="iataCode" value="<%= carrier.iata_code || '' %>" placeholder="e.g. SK" maxlength="3">
+    </div>
+    <div>
+      <label for="icaoCode">ICAO code</label>
+      <input type="text" id="icaoCode" name="icaoCode" value="<%= carrier.icao_code || '' %>" placeholder="e.g. SAS" maxlength="4">
+    </div>
+  </div>
+
+  <label for="notes">Notes</label>
+  <textarea id="notes" name="notes"><%= carrier.notes || '' %></textarea>
+
+  <div class="form-actions">
+    <button class="btn" type="submit"><%= isEdit ? 'Save changes' : 'Add carrier' %></button>
+    <a class="btn secondary" href="/carriers">Cancel</a>
+  </div>
+</form>
+<%- include('../partials/footer') %>

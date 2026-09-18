@@ -1,0 +1,104 @@
+<% var title = 'Dashboard' %>
+<% var extraHead = '<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">' %>
+<%- include('partials/header', { title: title, extraHead: extraHead }) %>
+<h1>Welcome back, <%= currentUser.username %></h1>
+
+<div class="tabs">
+  <button type="button" class="tab-btn is-active" data-tab="overview">Overview</button>
+  <button type="button" class="tab-btn" data-tab="map">Map</button>
+  <button type="button" class="tab-btn" data-tab="flights">Recent flights</button>
+</div>
+
+<section data-tab-panel="overview" class="tab-panel is-active">
+  <div class="stats-grid">
+    <div class="stat"><div class="num"><%= stats.total_flights %></div><div class="label">Flights logged</div></div>
+    <div class="stat"><div class="num"><%= stats.unique_carriers %></div><div class="label">Carriers flown</div></div>
+    <div class="stat"><div class="num"><%= stats.unique_aircraft %></div><div class="label">Aircraft types flown</div></div>
+    <div class="stat"><div class="num"><%= stats.unique_airports_visited %></div><div class="label">Airports visited</div></div>
+    <div class="stat"><div class="num"><%= stats.unique_countries_visited %></div><div class="label">Countries visited</div></div>
+    <div class="stat"><div class="num"><%= stats.total_distance_km.toLocaleString() %></div><div class="label">km flown</div></div>
+    <div class="stat"><div class="num"><%= Math.floor(stats.total_duration_minutes / 60) %>h <%= stats.total_duration_minutes % 60 %>m</div><div class="label">Time in the air</div></div>
+  </div>
+
+  <% if (stats.flights_with_known_distance < stats.total_flights) { %>
+    <p class="highlight-line">Distance is based on <strong><%= stats.flights_with_known_distance %></strong> of <%= stats.total_flights %> flights whose airports were recognized — flights with a free-typed code we don't know aren't counted.</p>
+  <% } %>
+
+  <% if (stats.flights_with_known_duration < stats.total_flights) { %>
+    <p class="highlight-line">Flight time is based on <strong><%= stats.flights_with_known_duration %></strong> of <%= stats.total_flights %> flights with a recorded duration.</p>
+  <% } %>
+
+  <% if (stats.longest_flight) { %>
+    <p class="highlight-line">Longest flight: <strong><%= stats.longest_flight.origin %> → <%= stats.longest_flight.destination %></strong> — <%= Math.round(stats.longest_flight.distance_km).toLocaleString() %> km<%= stats.longest_flight.flight_date ? ' on ' + stats.longest_flight.flight_date : '' %></p>
+  <% } %>
+
+  <% if (stats.diverted_flight_count > 0) { %>
+    <p class="highlight-line"><strong><%= stats.diverted_flight_count %></strong> diverted flight<%= stats.diverted_flight_count === 1 ? '' : 's' %>.</p>
+  <% } %>
+
+  <div class="two-col">
+    <div class="card">
+      <h2>Top carriers</h2>
+      <% if (stats.topCarriers.length === 0) { %>
+        <p class="empty-state">No flights logged yet.</p>
+      <% } else { %>
+        <table>
+          <% stats.topCarriers.forEach(function(c) { %>
+            <tr><td><%= c.name %></td><td class="muted"><%= c.flight_count %> flight<%= c.flight_count === 1 ? '' : 's' %></td></tr>
+          <% }) %>
+        </table>
+      <% } %>
+    </div>
+    <div class="card">
+      <h2>Top aircraft</h2>
+      <% if (stats.topAircraft.length === 0) { %>
+        <p class="empty-state">No flights logged yet.</p>
+      <% } else { %>
+        <table>
+          <% stats.topAircraft.forEach(function(a) { %>
+            <tr><td><%= [a.manufacturer, a.model].filter(Boolean).join(' ') %></td><td class="muted"><%= a.flight_count %> flight<%= a.flight_count === 1 ? '' : 's' %></td></tr>
+          <% }) %>
+        </table>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<section data-tab-panel="map" class="tab-panel" hidden>
+  <div id="flight-map"></div>
+</section>
+
+<section data-tab-panel="flights" class="tab-panel" hidden>
+  <div class="page-header">
+    <h2>Recent flights</h2>
+    <a class="btn" href="/flights/new">Log a flight</a>
+  </div>
+
+  <% if (recentFlights.length === 0) { %>
+    <p class="empty-state">Nothing logged yet — <a href="/flights/new">add your first flight</a>.</p>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Route</th><th>Carrier</th><th>Aircraft</th></tr>
+      </thead>
+      <tbody>
+        <% recentFlights.forEach(function(f) { %>
+          <tr>
+            <td><%= f.flight_date || '—' %></td>
+            <td><%= [f.origin, f.destination].filter(Boolean).join(' → ') || '—' %></td>
+            <td><%= f.carrier_name || '—' %></td>
+            <td><%= [f.aircraft_manufacturer, f.aircraft_model].filter(Boolean).join(' ') || '—' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <p style="margin-top:16px;"><a href="/flights">View the full flight list →</a></p>
+  <% } %>
+</section>
+
+<script>window.__FLIGHT_ROUTES__ = <%- JSON.stringify(flightRoutes) %>;</script>
+<script src="/vendor/leaflet/leaflet.js" defer></script>
+<script src="/js/dashboard-map.js" defer></script>
+<script src="/js/tabs.js" defer></script>
+
+<%- include('partials/footer') %>

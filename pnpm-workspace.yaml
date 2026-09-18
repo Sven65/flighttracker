@@ -1,0 +1,9 @@
+# This is a single-package project, not a monorepo - this file exists only
+# to tell pnpm it's allowed to run the native build scripts for the two
+# SQLite bindings this project uses (better-sqlite3 for the main DB,
+# sqlite3 as a transitive dep of connect-sqlite3 for sessions). Without
+# this, pnpm >=10 blocks those scripts by default and the app fails at
+# startup with "Could not locate the bindings file".
+allowBuilds:
+  better-sqlite3: true
+  sqlite3: true

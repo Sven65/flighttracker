@@ -1,0 +1,236 @@
+:root {
+  --bg: #0f1420;
+  --bg-card: #161d2e;
+  --border: #262f45;
+  --text: #e6e9f0;
+  --text-dim: #98a2b8;
+  --accent: #4f8dfd;
+  --accent-dim: #2c4d8a;
+  --danger: #e5566d;
+  --success: #3fbf83;
+  font-size: 16px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 24px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.brand { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+.brand:hover { text-decoration: none; }
+
+.topnav { display: flex; gap: 18px; flex: 1; }
+.topnav a { color: var(--text-dim); }
+.topnav a:hover { color: var(--text); text-decoration: none; }
+
+.logout-form { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.who { color: var(--text-dim); font-size: 0.9rem; }
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.auth-page .container { max-width: 380px; padding-top: 64px; }
+
+h1 { font-size: 1.6rem; margin: 0 0 20px; }
+h2 { font-size: 1.2rem; margin: 0 0 12px; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+.stat .num { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+.stat .label { color: var(--text-dim); font-size: 0.85rem; margin-top: 4px; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+th { color: var(--text-dim); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+tr:last-child td { border-bottom: none; }
+td.actions { white-space: nowrap; text-align: right; }
+td.actions form { display: inline; }
+
+.btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 7px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.btn:hover { background: #3f78e0; text-decoration: none; }
+.btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn.secondary:hover { border-color: var(--accent); }
+.btn.danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; font-size: 0.85rem; }
+.btn.danger:hover { background: var(--danger); color: #fff; }
+.btn.small { padding: 5px 10px; font-size: 0.85rem; }
+
+form.stacked label { display: block; margin: 14px 0 6px; font-size: 0.88rem; color: var(--text-dim); }
+input[type=text], input[type=password], input[type=email], input[type=date],
+input[type=time], input[type=number], textarea, select {
+  width: 100%;
+  background: #0c111c;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+textarea { resize: vertical; min-height: 70px; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+
+/* Chrome/Safari/Edge's native spin buttons render as a stark white block
+   on this dark theme regardless of the input's own styling - remove them
+   rather than leave a mismatched control sitting in an otherwise-themed
+   field. The up/down arrows aren't essential for a 0-23/0-59 duration
+   field anyway. */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Firefox/Chromium's date/time pickers use a separate "fields" text
+   color that doesn't inherit the input's own `color`, and default to
+   near-black on this dark background - this is the standard fix. */
+input[type=date], input[type=time] {
+  color-scheme: dark;
+}
+
+.error-banner {
+  background: rgba(229, 86, 109, 0.12);
+  border: 1px solid var(--danger);
+  color: #ffb0bd;
+  padding: 10px 14px;
+  border-radius: 7px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.empty-state { color: var(--text-dim); padding: 30px 0; text-align: center; }
+.muted { color: var(--text-dim); }
+.form-actions { margin-top: 20px; display: flex; gap: 10px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+
+.search-select { position: relative; }
+.search-select__results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  max-height: 260px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.search-select__results li {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.search-select__results li:hover,
+.search-select__results li.is-active {
+  background: var(--accent-dim);
+}
+.search-select__label { font-size: 0.92rem; color: var(--text); }
+.search-select__sublabel { font-size: 0.78rem; color: var(--text-dim); }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.is-active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+.tab-panel[hidden] { display: none; }
+
+.highlight-line { margin: 4px 0 20px; color: var(--text-dim); font-size: 0.92rem; }
+.highlight-line strong { color: var(--text); }
+
+#flight-map {
+  height: 480px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #0c111c;
+}
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--bg-card); color: var(--text); }
+.leaflet-bar a { background: var(--bg-card); color: var(--text); border-color: var(--border) !important; }
+.leaflet-bar a:hover { background: var(--accent-dim); }
+.leaflet-control-attribution { background: rgba(12, 17, 28, 0.8) !important; color: var(--text-dim) !important; }
+.leaflet-control-attribution a { color: var(--text-dim) !important; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.badge.badge-custom { color: var(--accent); border-color: var(--accent-dim); }

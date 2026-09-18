@@ -1,0 +1,40 @@
+<% var title = 'Flights' %>
+<%- include('../partials/header', { title: title }) %>
+<div class="page-header">
+  <h1>Flights</h1>
+  <a class="btn" href="/flights/new">Log a flight</a>
+</div>
+
+<% if (flights.length === 0) { %>
+  <p class="empty-state">No flights logged yet — <a href="/flights/new">add your first one</a>.</p>
+<% } else { %>
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Route</th><th>Flight #</th><th>Carrier</th><th>Aircraft</th><th>Duration</th><th>Seat</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% flights.forEach(function(f) { %>
+        <tr>
+          <td><%= f.flight_date || '—' %></td>
+          <td>
+            <%= [f.origin, f.destination].filter(Boolean).join(' → ') || '—' %>
+            <% if (f.diverted_to) { %><br><span class="badge badge-custom">Diverted → <%= f.diverted_to %></span><% } %>
+          </td>
+          <td><%= f.flight_number || '—' %></td>
+          <td><%= f.carrier_name || '—' %></td>
+          <td><%= [f.aircraft_manufacturer, f.aircraft_model].filter(Boolean).join(' ') || '—' %></td>
+          <td><%= f.duration_minutes != null ? Math.floor(f.duration_minutes / 60) + 'h ' + (f.duration_minutes % 60) + 'm' : '—' %></td>
+          <td><%= f.seat || '—' %></td>
+          <td class="actions">
+            <a class="btn secondary small" href="/flights/<%= f.id %>/edit">Edit</a>
+            <form action="/flights/<%= f.id %>/delete" method="POST" onsubmit="return confirm('Delete this flight?');">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="btn danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+<%- include('../partials/footer') %>

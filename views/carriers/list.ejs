@@ -1,0 +1,38 @@
+<% var title = 'Carriers' %>
+<%- include('../partials/header', { title: title }) %>
+<div class="page-header">
+  <h1>Carriers</h1>
+  <a class="btn" href="/carriers/new">Add carrier</a>
+</div>
+<p class="muted" style="margin-top:-10px; margin-bottom:20px;">Defaults are shared with every account and can't be edited — add your own if one's missing.</p>
+
+<% if (carriers.length === 0) { %>
+  <p class="empty-state">No carriers yet — <a href="/carriers/new">add one</a>.</p>
+<% } else { %>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>IATA</th><th>ICAO</th><th>Flights</th><th></th><th></th></tr>
+    </thead>
+    <tbody>
+      <% carriers.forEach(function(c) { %>
+        <tr>
+          <td><%= c.name %></td>
+          <td><%= c.iata_code || '—' %></td>
+          <td><%= c.icao_code || '—' %></td>
+          <td><%= c.flight_count %></td>
+          <td><% if (c.user_id) { %><span class="badge badge-custom">Yours</span><% } else { %><span class="badge">Default</span><% } %></td>
+          <td class="actions">
+            <% if (c.user_id === currentUserId) { %>
+              <a class="btn secondary small" href="/carriers/<%= c.id %>/edit">Edit</a>
+              <form action="/carriers/<%= c.id %>/delete" method="POST" onsubmit="return confirm('Delete this carrier?');">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button class="btn danger" type="submit">Delete</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+<%- include('../partials/footer') %>

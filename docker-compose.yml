@@ -1,0 +1,25 @@
+services:
+  flighttracker:
+    build: .
+    container_name: flighttracker
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DB_DRIVER: sqlite
+      SQLITE_PATH: /app/data/flighttracker.db
+      # Change this to a long random string before deploying
+      SESSION_SECRET: change-this-to-something-long-and-random
+      PORT: 3000
+      BCRYPT_SALT_ROUNDS: 12
+      # Set this if sharing the app beyond your own network - see
+      # .env.example for what it does and why it matters.
+      INVITE_CODE: ""
+      # Set to "true" only if this is running behind a reverse proxy
+      # that terminates HTTPS - see .env.example.
+      TRUST_PROXY: "false"
+      # Optional - leave blank to disable the flight-number lookup feature.
+      # See .env.example for how to get a free key.
+      AERODATABOX_API_KEY: ""
+    volumes:
+      - ./data:/app/data
