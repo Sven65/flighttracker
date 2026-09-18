@@ -12,18 +12,14 @@
     if (status) status.textContent = text;
   }
 
-  // Fills a plain text input by id, but only if the API actually returned
-  // a value for it - an empty/missing field should never clobber whatever
-  // the user already typed.
+  // Never overwrites a field the API didn't return a value for.
   function fillIfPresent(id, value) {
     if (value === null || value === undefined || value === '') return;
     var el = document.getElementById(id);
     if (el) el.value = value;
   }
 
-  // Fills a search-select's hidden id + visible label (carrier/aircraft),
-  // or - if no match was found in this user's own visible entries - just
-  // notes the provider's raw text so they can search/add it manually.
+  // Fills the hidden id + label if matched, else returns a note about the raw text.
   function fillPicked(hiddenId, visibleId, picked, unmatchedText, kind) {
     if (picked) {
       var hidden = document.getElementById(hiddenId);

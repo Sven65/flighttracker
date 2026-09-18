@@ -17,13 +17,7 @@
     }
 
     var map = L.map(container, { scrollWheelZoom: false });
-    // OpenStreetMap's own tile servers now actively block third-party app
-    // traffic outright (a policy tightened hard as of Sep 2026) - a
-    // Referrer-Policy fix alone doesn't get past it. Esri's ArcGIS Online
-    // basemap tiles are the standard free, keyless fallback for exactly
-    // this situation. If Esri ever locks this down too, self-hosting a
-    // basemap (e.g. Protomaps PMTiles) is the durable long-term fix - see
-    // the README.
+    // Esri tiles, not OSM directly - OSM blocks third-party app traffic.
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri — Sources: Esri, HERE, Garmin, USGS, NRCan, OpenStreetMap contributors, and the GIS community',
       maxZoom: 19,
@@ -34,9 +28,7 @@
 
     routes.forEach(function (r) {
       var originLatLng = [r.origin_lat, r.origin_lon];
-      // destination_lat/lon are always the *effective* endpoint's
-      // coordinates (the diversion airport when there is one) - see
-      // sqliteDriver.ts's getFlightRoutesForUser.
+      // destination_lat/lon is always the effective endpoint (diversion airport if any).
       var destLatLng = [r.destination_lat, r.destination_lon];
 
       L.polyline([originLatLng, destLatLng], {

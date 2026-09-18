@@ -22,27 +22,15 @@ async function main(): Promise<void> {
 
   const app = express();
   app.set('view engine', 'ejs');
-  // views/ and public/ live at the project root, one level up from both
-  // src/ (dev, via ts-node) and dist/ (prod, via tsc) - so this path works
-  // in both places.
   app.set('views', path.join(__dirname, '..', 'views'));
 
-  // Only trust X-Forwarded-* headers when actually running behind a
-  // reverse proxy (Caddy, Traefik, nginx) - otherwise a client could
-  // spoof its own IP and bypass rate limiting. Also makes the session
-  // cookie's `secure` flag work correctly (see below) and gives
-  // rate-limiting the real client IP instead of the proxy's.
+  // Required for rate limiting / secure cookies to see the real client
+  // behind a reverse proxy - only enable if one is actually in front.
   const trustProxy = process.env.TRUST_PROXY === 'true';
   if (trustProxy) {
     app.set('trust proxy', 1);
   }
 
-  // referrerPolicy: false leaves the browser's own default
-  // (strict-origin-when-cross-origin) in place, rather than Helmet's
-  // default of stripping the Referer header entirely. Harmless either way
-  // for the current tile provider (Esri doesn't require it), but some free
-  // tile/map services do check it, so this avoids a needless dependency on
-  // whichever one is wired up later.
   app.use(helmet({ contentSecurityPolicy: false, referrerPolicy: false }));
   app.use(express.urlencoded({ extended: true }));
   app.use(express.static(path.join(__dirname, '..', 'public')));
@@ -60,11 +48,6 @@ async function main(): Promise<void> {
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         sameSite: 'lax',
-        // Only marked secure (HTTPS-only) when a reverse proxy is
-        // confirmed to be terminating TLS in front - see TRUST_PROXY.
-        // Setting this true without an actual HTTPS-terminating proxy in
-        // front would silently break every login (browsers refuse to
-        // send secure cookies over plain HTTP).
         secure: trustProxy,
       },
     })

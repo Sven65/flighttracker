@@ -17,36 +17,16 @@ import type {
 } from '../types/models';
 
 /**
- * Driver interface
- * -----------------
- * This is the contract every database backend must implement. It exposes
- * domain-level operations (createUser, listFlightsForUser, ...) rather than
- * raw SQL, so callers (routes) never know or care what's underneath.
+ * Contract every DB backend implements. Routes call these methods, never
+ * raw SQL. Carrier/aircraft/airport methods take userId to enforce the
+ * ownership model: rows with no owner are shared defaults, rows with an
+ * owner are private to that user.
  *
- * Ownership model: carriers, aircraft, and airports all support a shared
- * "default" tier (owned by nobody, visible to every user) plus entries a
- * specific user adds themselves (visible and editable only by them). Every
- * list/get/search/update/delete method below takes the current user's id
- * for exactly this reason - implementations must include rows where the
- * owner is null OR matches that id, and must restrict update/delete to
- * rows the user actually owns (never the shared defaults).
- *
- * To add a new backend later (Postgres, MySQL, ...):
- *   1. Create src/db/<name>Driver.ts
- *   2. class <Name>Driver extends Driver { ...implement every method below }
- *   3. Register it in db/index.ts's driver map
- *   4. Set DB_DRIVER=<name> in .env
- *
- * Every method here is async, even though the SQLite implementation
- * happens to be synchronous under the hood - that keeps route code
- * identical no matter which driver is active, including future drivers
- * that genuinely need to await a network round trip.
+ * To add a backend: implement this class in src/db/<name>Driver.ts,
+ * register it in db/index.ts, set DB_DRIVER=<name>.
  */
 export abstract class Driver {
-  /** Run migrations / create tables. Called once at startup. */
   abstract init(): Promise<void>;
-
-  /** Close any open connections/handles. Called on shutdown. */
   abstract close(): Promise<void>;
 
   // ---- users -------------------------------------------------------
@@ -84,7 +64,6 @@ export abstract class Driver {
   abstract deleteAircraft(id: number | string, userId: number): Promise<void>;
   /** Substring match against manufacturer/model/registration, for the flight form's search box. */
   abstract searchAircraft(query: string, userId: number, limit?: number): Promise<Aircraft[]>;
-
 
   // ---- airports ------------------------------------------------------
   abstract createAirport(userId: number, data: AirportInput): Promise<Airport>;

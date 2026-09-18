@@ -4,11 +4,7 @@ function toRadians(deg: number): number {
   return (deg * Math.PI) / 180;
 }
 
-/**
- * Great-circle (haversine) distance between two lat/lon points, in km.
- * Lives outside any one driver since any future backend (Postgres, etc.)
- * needs the exact same math - it's plain geometry, not a SQL feature.
- */
+/** Great-circle distance between two lat/lon points, in km. */
 export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const dLat = toRadians(lat2 - lat1);
   const dLon = toRadians(lon2 - lon1);

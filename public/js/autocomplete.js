@@ -1,24 +1,16 @@
 /**
  * Debounced search-select widget.
  *
- * Markup contract, on a wrapping element with [data-search-select]:
- *   data-search-url   - endpoint to GET ?q=<query>, returning
- *                        [{ value, label, sublabel }, ...]
- *   data-debounce      - ms to wait after typing stops (default 250)
- *   data-min-chars       - minimum query length before searching (default 2)
+ * Wrapper needs [data-search-select] + data-search-url (GET ?q= endpoint
+ * returning [{value, label, sublabel}]), optionally data-debounce (ms,
+ * default 250) and data-min-chars (default 2).
  *
- * Inside it:
- *   [data-role="search-input"]  - the visible text box (required)
- *   [data-role="hidden-value"]   - optional hidden <input> carrying the
- *                                   real submitted value (e.g. a carrier id).
- *                                   When present, selecting a result sets
- *                                   hidden.value = result.value and shows
- *                                   result.label in the visible box.
- *                                   When absent, the visible box IS the
- *                                   submitted field, and selecting a result
- *                                   replaces its value with result.value
- *                                   directly (used for airport codes).
- *   [data-role="results"]         - the <ul> the result list renders into.
+ * Inside: [data-role="search-input"] is the text box. Optional
+ * [data-role="hidden-value"] holds the real submitted value (e.g. a
+ * carrier id) - if present, picking a result sets hidden.value + shows
+ * label in the text box; if absent, the text box itself becomes the
+ * picked value.value (used for airport codes). [data-role="results"] is
+ * the results <ul>.
  */
 (function () {
   function debounce(fn, delay) {
@@ -66,9 +58,7 @@
   SearchSelect.prototype.onInput = function () {
     var query = this.input.value.trim();
 
-    // Typing invalidates whatever was previously selected until a fresh
-    // pick is made, so we never submit a stale id/code that no longer
-    // matches what's shown in the box.
+    // Invalidate the previous pick until a new one is made.
     if (this.hidden) this.hidden.value = '';
 
     if (query.length < this.minChars) {

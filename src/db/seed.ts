@@ -3,14 +3,7 @@ import path from 'path';
 import type { Driver } from './driver';
 import type { AirportInput } from '../types/models';
 
-/**
- * Common carriers and aircraft, seeded into a fresh database so there's
- * something to search right away. Only runs when the relevant table is
- * completely empty, so it never touches a database that already has
- * user-entered data - including one where the user deleted every seeded
- * row on purpose.
- */
-
+/** Seeded once into an empty table - never touches a DB that already has data. */
 const SEED_CARRIERS: { name: string; iataCode: string; icaoCode: string }[] = [
   { name: 'Scandinavian Airlines', iataCode: 'SK', icaoCode: 'SAS' },
   { name: 'Norwegian Air Shuttle', iataCode: 'DY', icaoCode: 'NAX' },

@@ -15,9 +15,7 @@
         panel.classList.toggle('is-active', show);
       });
 
-      // The map is only initialized the first time its tab is opened, so
-      // its container is guaranteed visible (Leaflet sizes itself wrong
-      // if built against a hidden, zero-size container).
+      // Lazy-init: Leaflet sizes itself wrong in a hidden container.
       if (target === 'map' && typeof window.initFlightMap === 'function') {
         window.initFlightMap();
       }

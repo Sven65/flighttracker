@@ -4,19 +4,12 @@ const API_BASE = 'https://aerodatabox.p.rapidapi.com';
 const API_HOST = 'aerodatabox.p.rapidapi.com';
 
 /**
- * Looks up a flight by flight number + date via AeroDataBox (RapidAPI).
- * Returns null if the feature isn't configured (no API key), the flight
- * wasn't found, or the request failed for any reason - callers treat
- * "no result" and "error" the same way (nothing to prefill, try manually).
+ * Looks up a flight via AeroDataBox. Returns null if unconfigured, not
+ * found, or the request fails - callers treat all three the same way.
  *
- * IMPORTANT: this parser is written from AeroDataBox's public docs and
- * third-party examples, not a live-tested response - I have no API key of
- * my own to verify it against. The field paths below (departure.airport,
- * aircraft.model/reg, etc.) are AeroDataBox's documented shape as of when
- * this was written, but if a real lookup comes back with `found: true`
- * and mostly-empty fields, that's the first place to check - open the raw
- * response (a temporary console.log(json) in this file is the fastest way
- * to see the actual shape) and adjust the field paths below to match.
+ * Untested against a live key - field paths below are from AeroDataBox's
+ * docs, not a real response. If `found: true` comes back mostly empty,
+ * log the raw JSON here and fix the paths.
  */
 export async function lookupFlight(
   flightNumber: string,
@@ -44,8 +37,7 @@ export async function lookupFlight(
     return null;
   }
 
-  // The endpoint returns an array (codeshares / multiple operations on the
-  // same number can both match) - take the first entry.
+  // Endpoint returns an array (codeshares can share a number) - take the first.
   const flight = Array.isArray(json) ? json[0] : json;
   if (!flight || typeof flight !== 'object') return null;
 
@@ -69,11 +61,7 @@ function parseFlight(flight: Record<string, unknown>): FlightLookupResult {
   const status = typeof flight.status === 'string' ? flight.status : null;
   const isDiverted = status === 'Diverted';
 
-  // Best-effort - AeroDataBox's exact field for "where a diverted flight
-  // actually ended up" isn't confirmed against a live response (see the
-  // module doc comment above). Tries a couple of plausible shapes, falls
-  // back to null (still correctly flags isDiverted, just without a
-  // specific airport) if none match.
+  // Best-effort field guess for the diversion airport - unconfirmed shape.
   const divertedToIcao =
     extractIcao(asRecord(arrival?.actualAirport)) ??
     extractIcao(asRecord(flight.diversionAirport)) ??
@@ -91,7 +79,7 @@ function parseFlight(flight: Record<string, unknown>): FlightLookupResult {
     carrierName: typeof airline?.name === 'string' ? airline.name : null,
     carrierIcao: typeof airline?.icao === 'string' ? airline.icao : null,
     aircraftModel: typeof aircraft?.model === 'string' ? aircraft.model : null,
-    aircraftManufacturer: null, // AeroDataBox's aircraft.model is usually "Manufacturer Model" combined
+    aircraftManufacturer: null,
     aircraftRegistration: typeof aircraft?.reg === 'string' ? aircraft.reg : null,
   };
 }

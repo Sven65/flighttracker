@@ -46,13 +46,8 @@ export class SqliteDriver extends Driver {
     const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
     this.db.exec(schema);
 
-    // Migrate databases created before the per-user ownership model existed -
-    // CREATE TABLE IF NOT EXISTS above won't touch an already-existing table.
-    // This must run before indexes.sql, since that indexes user_id too.
-    // If the column was just added, every existing row was necessarily added
-    // by a real user (seeding didn't exist before this model did), so they're
-    // backfilled to the first account rather than left as an orphaned,
-    // permanently-uneditable "default".
+    // Migrate pre-ownership-model DBs; backfill existing rows to the
+    // first account since seeding didn't exist before this.
     const carriersJustMigrated = this.ensureColumn(
       'carriers',
       'user_id',
@@ -70,8 +65,6 @@ export class SqliteDriver extends Driver {
       this.db.exec('UPDATE aircraft SET user_id = (SELECT MIN(id) FROM users) WHERE user_id IS NULL');
     }
 
-    // New optional flight fields - straightforward additive migration,
-    // no backfill needed since NULL is the correct "unknown" value here.
     this.ensureColumn('flights', 'departure_time', 'TEXT');
     this.ensureColumn('flights', 'arrival_time', 'TEXT');
     this.ensureColumn('flights', 'duration_minutes', 'INTEGER');
@@ -478,11 +471,10 @@ export class SqliteDriver extends Driver {
          JOIN airports oa ON oa.icao_code = UPPER(f.origin)
            AND oa.latitude IS NOT NULL AND oa.longitude IS NOT NULL
            AND (oa.user_id IS NULL OR oa.user_id = f.user_id)
-         -- da: the originally scheduled destination, for display only
+         -- da: originally scheduled destination (display only)
          LEFT JOIN airports da ON da.icao_code = UPPER(f.destination)
            AND (da.user_id IS NULL OR da.user_id = f.user_id)
-         -- ea: the airport actually flown to - diverted_to when set, destination otherwise -
-         -- this is what the map/distance stats use as the real endpoint
+         -- ea: actual endpoint (diverted_to if set, else destination)
          JOIN airports ea ON ea.icao_code = UPPER(COALESCE(f.diverted_to, f.destination))
            AND ea.latitude IS NOT NULL AND ea.longitude IS NOT NULL
            AND (ea.user_id IS NULL OR ea.user_id = f.user_id)

@@ -28,11 +28,7 @@ export default function flightRoutes(db: Driver): Router {
     res.render('flights/form', { flight: {}, error: null, isEdit: false, lookupEnabled });
   });
 
-  // Looks up a flight by number + date via AeroDataBox (if configured) and
-  // resolves the returned carrier/aircraft text against this user's own
-  // visible entries where possible. Never fails hard - "not found" and
-  // "lookup error" both just come back as { found: false }, so the form
-  // can fall back to manual entry either way.
+  // Never fails hard - "not found" and "error" both come back as { found: false }.
   router.get('/lookup', async (req, res) => {
     if (!lookupEnabled) {
       res.status(404).json({ found: false });
