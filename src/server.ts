@@ -18,7 +18,26 @@ import adminRoutes from './routes/adminRoutes';
 
 const SQLiteStore = connectSqlite3(session);
 
+const PLACEHOLDER_SECRETS = new Set(['dev-secret-change-me', 'change-this-to-something-long-and-random']);
+
+function checkSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  const isUnsafe = !secret || PLACEHOLDER_SECRETS.has(secret);
+
+  if (isUnsafe && process.env.NODE_ENV === 'production') {
+    console.error(
+      'SESSION_SECRET is missing or still the placeholder value - set a real random string before running in production.'
+    );
+    process.exit(1);
+  }
+  if (isUnsafe) {
+    console.warn('Warning: SESSION_SECRET is missing or the placeholder value - fine for local dev only.');
+  }
+  return secret || 'dev-secret-change-me';
+}
+
 async function main(): Promise<void> {
+  const sessionSecret = checkSessionSecret();
   const db = await getDb();
 
   const app = express();
@@ -41,7 +60,7 @@ async function main(): Promise<void> {
         dir: path.join(__dirname, '..', 'data'),
         db: 'sessions.sqlite',
       }) as unknown as session.Store,
-      secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -83,10 +102,12 @@ async function main(): Promise<void> {
     console.log(`Flighttracker listening on http://localhost:${port}`);
   });
 
-  process.on('SIGINT', async () => {
+  const shutdown = async () => {
     await db.close();
     process.exit(0);
-  });
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown); // Docker sends this on `stop`/`compose down`, not SIGINT
 }
 
 main().catch((err) => {

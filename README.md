@@ -150,3 +150,8 @@ see `src/db/schema.sql` for exact columns.
 default. `pnpm-workspace.yaml` already allowlists both. Add any new
 native dependency there too, or `pnpm install` will fail with
 `ERR_PNPM_IGNORED_BUILDS`.
+
+## License
+
+MIT - see `LICENSE`. A few bundled assets (Leaflet, two webfonts) keep
+their own licenses; see `THIRD_PARTY_LICENSES/`.
