@@ -1,15 +1,81 @@
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/vendor/fonts/fraunces-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/vendor/fonts/fraunces-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/vendor/fonts/source-sans-3-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/vendor/fonts/source-sans-3-latin-600-normal.woff2') format('woff2');
+}
+
 :root {
-  --bg: #0f1420;
-  --bg-card: #161d2e;
-  --border: #262f45;
-  --text: #e6e9f0;
-  --text-dim: #98a2b8;
-  --accent: #4f8dfd;
-  --accent-dim: #2c4d8a;
-  --danger: #e5566d;
-  --success: #3fbf83;
+  /* Boarding Pass - light (default) */
+  --bg: #f7f3ea;
+  --bg-card: #ffffff;
+  --border: #ddd3bd;
+  --text: #2a2620;
+  --text-dim: #8a7f6e;
+  --heading: #1d2b4f;
+  --accent: #a3402f;
+  --accent-dim: #f3e3dc;
+  --danger: #b3261e;
+  --danger-bg: rgba(179, 38, 30, 0.08);
+  --success: #2f7a4f;
+  color-scheme: light dark;
   font-size: 16px;
 }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17120f;
+    --bg-card: #221b16;
+    --border: #3d3128;
+    --text: #ece3d2;
+    --text-dim: #9c8f7a;
+    --heading: #d4a24e;
+    --accent: #e2805f;
+    --accent-dim: #3a2620;
+    --danger: #e0554a;
+    --danger-bg: rgba(224, 85, 74, 0.16);
+    --success: #5fae6b;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #17120f;
+  --bg-card: #221b16;
+  --border: #3d3128;
+  --text: #ece3d2;
+  --text-dim: #9c8f7a;
+  --heading: #d4a24e;
+  --accent: #e2805f;
+  --accent-dim: #3a2620;
+  --danger: #e0554a;
+  --danger-bg: rgba(224, 85, 74, 0.16);
+  --success: #5fae6b;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
 
 * { box-sizing: border-box; }
 
@@ -17,12 +83,14 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
 }
 
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+h1, h2 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; color: var(--heading); }
 
 .topbar {
   display: flex;
@@ -34,7 +102,15 @@ a:hover { text-decoration: underline; }
   flex-wrap: wrap;
 }
 
-.brand { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--heading);
+}
 .brand:hover { text-decoration: none; }
 
 .topnav { display: flex; gap: 18px; flex: 1; }
@@ -52,8 +128,9 @@ a:hover { text-decoration: underline; }
 
 .auth-page .container { max-width: 380px; padding-top: 64px; }
 
-h1 { font-size: 1.6rem; margin: 0 0 20px; }
+h1 { font-size: 1.7rem; margin: 0 0 20px; }
 h2 { font-size: 1.2rem; margin: 0 0 12px; }
+.card h2 { padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px dashed var(--border); }
 
 .page-header {
   display: flex;
@@ -67,7 +144,7 @@ h2 { font-size: 1.2rem; margin: 0 0 12px; }
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 20px;
   margin-bottom: 18px;
 }
@@ -78,13 +155,13 @@ h2 { font-size: 1.2rem; margin: 0 0 12px; }
   gap: 14px;
   margin-bottom: 24px;
 }
-.stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
-.stat .num { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+.stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 16px; text-align: center; }
+.stat .num { font-family: 'Fraunces', Georgia, serif; font-size: 1.9rem; font-weight: 600; color: var(--heading); }
 .stat .label { color: var(--text-dim); font-size: 0.85rem; margin-top: 4px; }
 
 table { width: 100%; border-collapse: collapse; }
-th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
-th { color: var(--text-dim); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+th { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 0.8rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+td { text-align: left; padding: 10px 8px; border-bottom: 1px dashed var(--border); font-size: 0.95rem; }
 tr:last-child td { border-bottom: none; }
 td.actions { white-space: nowrap; text-align: right; }
 td.actions form { display: inline; }
@@ -95,36 +172,34 @@ td.actions form { display: inline; }
   color: #fff;
   border: none;
   padding: 9px 16px;
-  border-radius: 7px;
+  border-radius: 4px;
   font-size: 0.95rem;
   cursor: pointer;
 }
-.btn:hover { background: #3f78e0; text-decoration: none; }
+.btn:hover { filter: brightness(0.9); text-decoration: none; }
 .btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
-.btn.secondary:hover { border-color: var(--accent); }
+.btn.secondary:hover { border-color: var(--accent); filter: none; }
 .btn.danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; font-size: 0.85rem; }
-.btn.danger:hover { background: var(--danger); color: #fff; }
+.btn.danger:hover { background: var(--danger); color: #fff; filter: none; }
 .btn.small { padding: 5px 10px; font-size: 0.85rem; }
 
 form.stacked label { display: block; margin: 14px 0 6px; font-size: 0.88rem; color: var(--text-dim); }
 input[type=text], input[type=password], input[type=email], input[type=date],
 input[type=time], input[type=number], textarea, select {
   width: 100%;
-  background: #0c111c;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: 4px;
   padding: 10px 12px;
   color: var(--text);
+  font-family: inherit;
   font-size: 0.95rem;
 }
 textarea { resize: vertical; min-height: 70px; }
 input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
 
-/* Chrome/Safari/Edge's native spin buttons render as a stark white block
-   on this dark theme regardless of the input's own styling - remove them
-   rather than leave a mismatched control sitting in an otherwise-themed
-   field. The up/down arrows aren't essential for a 0-23/0-59 duration
-   field anyway. */
+/* Chrome/Safari/Edge's native number spin buttons ignore the input's own
+   styling - drop them rather than leave a mismatched control behind. */
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -134,19 +209,12 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-/* Firefox/Chromium's date/time pickers use a separate "fields" text
-   color that doesn't inherit the input's own `color`, and default to
-   near-black on this dark background - this is the standard fix. */
-input[type=date], input[type=time] {
-  color-scheme: dark;
-}
-
 .error-banner {
-  background: rgba(229, 86, 109, 0.12);
+  background: var(--danger-bg);
   border: 1px solid var(--danger);
-  color: #ffb0bd;
+  color: var(--danger);
   padding: 10px 14px;
-  border-radius: 7px;
+  border-radius: 4px;
   margin-bottom: 16px;
   font-size: 0.9rem;
 }
@@ -165,17 +233,17 @@ input[type=date], input[type=time] {
   z-index: 20;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: 4px;
   max-height: 260px;
   overflow-y: auto;
   list-style: none;
   margin: 0;
   padding: 4px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 .search-select__results li {
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -199,6 +267,7 @@ input[type=date], input[type=time] {
   background: transparent;
   border: none;
   color: var(--text-dim);
+  font-family: inherit;
   padding: 10px 16px;
   font-size: 0.95rem;
   cursor: pointer;
@@ -206,7 +275,7 @@ input[type=date], input[type=time] {
   margin-bottom: -1px;
 }
 .tab-btn:hover { color: var(--text); }
-.tab-btn.is-active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+.tab-btn.is-active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 .tab-panel[hidden] { display: none; }
 
 .highlight-line { margin: 4px 0 20px; color: var(--text-dim); font-size: 0.92rem; }
@@ -214,16 +283,16 @@ input[type=date], input[type=time] {
 
 #flight-map {
   height: 480px;
-  border-radius: 10px;
+  border-radius: 4px;
   overflow: hidden;
   border: 1px solid var(--border);
-  background: #0c111c;
+  background: var(--bg-card);
 }
 .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--bg-card); color: var(--text); }
 .leaflet-bar a { background: var(--bg-card); color: var(--text); border-color: var(--border) !important; }
 .leaflet-bar a:hover { background: var(--accent-dim); }
-.leaflet-control-attribution { background: rgba(12, 17, 28, 0.8) !important; color: var(--text-dim) !important; }
-.leaflet-control-attribution a { color: var(--text-dim) !important; }
+.leaflet-control-attribution { background: rgba(12, 17, 28, 0.7) !important; color: #d8d8d8 !important; }
+.leaflet-control-attribution a { color: #d8d8d8 !important; }
 
 .badge {
   display: inline-block;
@@ -233,4 +302,4 @@ input[type=date], input[type=time] {
   border: 1px solid var(--border);
   color: var(--text-dim);
 }
-.badge.badge-custom { color: var(--accent); border-color: var(--accent-dim); }
+.badge.badge-custom { color: var(--accent); border-color: var(--accent); }

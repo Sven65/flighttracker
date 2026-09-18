@@ -16,6 +16,7 @@ import type {
   FlightRoute,
   InviteCode,
   InviteCodeWithUsage,
+  ThemePreference,
   UserWithInviteStats,
 } from '../types/models';
 
@@ -39,6 +40,7 @@ export abstract class Driver {
   /** Throws on a duplicate email (the column is UNIQUE) - callers should catch and show a friendly message. */
   abstract updateUserEmail(userId: number, email: string | null): Promise<User | null>;
   abstract updateUserPassword(userId: number, passwordHash: string): Promise<void>;
+  abstract updateUserTheme(userId: number, theme: ThemePreference): Promise<void>;
   abstract countUsers(): Promise<number>;
   abstract listAllUsersForAdmin(): Promise<UserWithInviteStats[]>;
 

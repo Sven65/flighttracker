@@ -9,6 +9,19 @@
 </div>
 
 <div class="card">
+  <h2>Theme</h2>
+  <form class="stacked" action="/account/theme" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label for="theme">Appearance</label>
+    <select id="theme" name="theme" onchange="this.form.submit()">
+      <option value="system" <%= user.theme_preference === 'system' ? 'selected' : '' %>>Match device</option>
+      <option value="light" <%= user.theme_preference === 'light' ? 'selected' : '' %>>Light</option>
+      <option value="dark" <%= user.theme_preference === 'dark' ? 'selected' : '' %>>Dark</option>
+    </select>
+  </form>
+</div>
+
+<div class="card">
   <h2>Invites</h2>
   <p>
     <% if (user.is_admin === 1) { %>

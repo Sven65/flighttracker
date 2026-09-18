@@ -5,6 +5,8 @@
  * directly rather than re-mapping to camelCase.
  */
 
+export type ThemePreference = 'system' | 'light' | 'dark';
+
 export interface User {
   id: number;
   username: string;
@@ -12,6 +14,7 @@ export interface User {
   password_hash: string;
   is_admin: 0 | 1;
   invites_remaining: number;
+  theme_preference: ThemePreference;
   created_at: string;
 }
 

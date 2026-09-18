@@ -73,7 +73,7 @@ src/middleware/csrf.ts                CSRF tokens
 src/middleware/rateLimit.ts            Login/register rate limits
 src/routes/                              One file per resource, incl. adminRoutes
 views/                                     EJS templates
-public/                                     JS, CSS, vendored Leaflet
+public/                                     JS, CSS, vendored Leaflet + fonts
 ```
 
 To swap out SQLite: implement `Driver` (see `src/db/driver.ts`) in a new
@@ -103,6 +103,19 @@ user).
 Flights can record departure/arrival time, duration, and a diversion
 airport. If a flight was diverted, the map and distance stats use the
 diversion airport as the endpoint, not the original destination.
+
+## Theme
+
+Light by default, follows the OS/browser dark-mode preference
+automatically (`prefers-color-scheme`), and each user can override that
+from `/account` (System / Light / Dark) — the choice is stored per-user
+and rendered server-side as a `data-theme` attribute on `<html>`, so
+there's no flash of the wrong theme and no client-side JS involved.
+
+Fonts (Fraunces for headings, Source Sans 3 for body text) are vendored
+locally under `public/vendor/fonts/` rather than pulled from Google
+Fonts, same reasoning as vendoring Leaflet - no external dependency for
+the app to render correctly.
 
 ## Flight-number lookup (optional)
 

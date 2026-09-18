@@ -1,15 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"<% if (currentUser && currentUser.theme_preference && currentUser.theme_preference !== 'system') { %> data-theme="<%= currentUser.theme_preference %>"<% } %>>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Opts out of Dark Reader et al. - the app has its own light/dark mode already. -->
+  <meta name="darkreader-lock">
   <title><%= typeof title !== 'undefined' ? title + ' · Flighttracker' : 'Flighttracker' %></title>
   <link rel="stylesheet" href="/css/style.css">
   <% if (typeof extraHead !== 'undefined') { %><%- extraHead %><% } %>
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/">✈️ Flighttracker</a>
+    <a class="brand" href="/">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12L22 3L14 21L11 13L2 12Z" fill="currentColor"/></svg>
+      Flighttracker
+    </a>
     <% if (currentUser) { %>
       <nav class="topnav">
         <a href="/">Dashboard</a>

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash     TEXT NOT NULL,
   is_admin          INTEGER NOT NULL DEFAULT 0,
   invites_remaining INTEGER NOT NULL DEFAULT 5,
+  theme_preference  TEXT NOT NULL DEFAULT 'system',
   created_at        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

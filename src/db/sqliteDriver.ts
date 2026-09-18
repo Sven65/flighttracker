@@ -24,6 +24,7 @@ import type {
   FlightRoute,
   InviteCode,
   InviteCodeWithUsage,
+  ThemePreference,
   UserWithInviteStats,
 } from '../types/models';
 
@@ -74,6 +75,7 @@ export class SqliteDriver extends Driver {
 
     const adminJustMigrated = this.ensureColumn('users', 'is_admin', 'INTEGER NOT NULL DEFAULT 0');
     this.ensureColumn('users', 'invites_remaining', 'INTEGER NOT NULL DEFAULT 5');
+    this.ensureColumn('users', 'theme_preference', "TEXT NOT NULL DEFAULT 'system'");
     if (adminJustMigrated) {
       this.db.exec('UPDATE users SET is_admin = 1 WHERE id = (SELECT MIN(id) FROM users)');
     }
@@ -122,6 +124,10 @@ export class SqliteDriver extends Driver {
 
   async updateUserPassword(userId: number, passwordHash: string): Promise<void> {
     this.db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, userId);
+  }
+
+  async updateUserTheme(userId: number, theme: ThemePreference): Promise<void> {
+    this.db.prepare('UPDATE users SET theme_preference = ? WHERE id = ?').run(theme, userId);
   }
 
   async countUsers(): Promise<number> {
