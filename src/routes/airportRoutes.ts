@@ -1,6 +1,12 @@
 import express, { Router } from 'express';
 import { requireAuth } from '../middleware/auth';
+import { setFlash, popFlash } from '../utils/flash';
 import type { Driver } from '../db/driver';
+
+interface FormFlash {
+  error?: string;
+  formValues?: Record<string, unknown>;
+}
 
 export default function airportRoutes(db: Driver): Router {
   const router = express.Router();
@@ -14,7 +20,8 @@ export default function airportRoutes(db: Driver): Router {
   });
 
   router.get('/new', (req, res) => {
-    res.render('airports/form', { airport: {}, error: null });
+    const flash = popFlash<FormFlash>(req);
+    res.render('airports/form', { airport: flash.formValues ?? {}, error: flash.error ?? null });
   });
 
   router.get('/search', async (req, res) => {
@@ -37,10 +44,8 @@ export default function airportRoutes(db: Driver): Router {
     const { icaoCode, iataCode, name, municipality, countryCode } = req.body;
     const icao = (icaoCode || '').trim().toUpperCase();
     if (!icao || !name || !name.trim()) {
-      res.render('airports/form', {
-        airport: req.body,
-        error: 'ICAO code and name are required.',
-      });
+      setFlash(req, { error: 'ICAO code and name are required.', formValues: req.body });
+      res.redirect('/airports/new');
       return;
     }
     try {
@@ -52,11 +57,12 @@ export default function airportRoutes(db: Driver): Router {
         countryCode: countryCode ? countryCode.trim().toUpperCase() : null,
       });
       res.redirect('/airports');
-    } catch (err) {
-      res.render('airports/form', {
-        airport: req.body,
+    } catch {
+      setFlash(req, {
         error: `"${icao}" already exists as a default or custom airport.`,
+        formValues: req.body,
       });
+      res.redirect('/airports/new');
     }
   });
 

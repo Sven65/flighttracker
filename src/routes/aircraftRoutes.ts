@@ -1,6 +1,12 @@
 import express, { Router } from 'express';
 import { requireAuth } from '../middleware/auth';
+import { setFlash, popFlash } from '../utils/flash';
 import type { Driver } from '../db/driver';
+
+interface FormFlash {
+  error?: string;
+  formValues?: Record<string, unknown>;
+}
 
 export default function aircraftRoutes(db: Driver): Router {
   const router = express.Router();
@@ -12,7 +18,12 @@ export default function aircraftRoutes(db: Driver): Router {
   });
 
   router.get('/new', (req, res) => {
-    res.render('aircraft/form', { aircraft: {}, error: null, isEdit: false });
+    const flash = popFlash<FormFlash>(req);
+    res.render('aircraft/form', {
+      aircraft: flash.formValues ?? {},
+      error: flash.error ?? null,
+      isEdit: false,
+    });
   });
 
   router.get('/search', async (req, res) => {
@@ -34,11 +45,8 @@ export default function aircraftRoutes(db: Driver): Router {
   router.post('/', async (req, res) => {
     const { manufacturer, model, registration, notes } = req.body;
     if (!model || !model.trim()) {
-      res.render('aircraft/form', {
-        aircraft: req.body,
-        error: 'Model is required (e.g. "737-800").',
-        isEdit: false,
-      });
+      setFlash(req, { error: 'Model is required (e.g. "737-800").', formValues: req.body });
+      res.redirect('/aircraft/new');
       return;
     }
     await db.createAircraft(req.session.userId!, {
@@ -60,17 +68,19 @@ export default function aircraftRoutes(db: Driver): Router {
       res.status(403).send('Default aircraft cannot be edited - add your own instead.');
       return;
     }
-    res.render('aircraft/form', { aircraft, error: null, isEdit: true });
+    const flash = popFlash<FormFlash>(req);
+    res.render('aircraft/form', {
+      aircraft: flash.formValues ?? aircraft,
+      error: flash.error ?? null,
+      isEdit: true,
+    });
   });
 
   router.post('/:id', async (req, res) => {
     const { manufacturer, model, registration, notes } = req.body;
     if (!model || !model.trim()) {
-      res.render('aircraft/form', {
-        aircraft: { ...req.body, id: req.params.id },
-        error: 'Model is required.',
-        isEdit: true,
-      });
+      setFlash(req, { error: 'Model is required.', formValues: { ...req.body, id: req.params.id } });
+      res.redirect(`/aircraft/${req.params.id}/edit`);
       return;
     }
     await db.updateAircraft(req.params.id, req.session.userId!, {

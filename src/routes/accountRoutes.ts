@@ -2,6 +2,7 @@ import express, { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { requireAuth } from '../middleware/auth';
 import { generateInviteCode } from '../utils/inviteCode';
+import { setFlash, popFlash } from '../utils/flash';
 import type { Driver } from '../db/driver';
 
 interface AccountFlash {
@@ -18,15 +19,14 @@ export default function accountRoutes(db: Driver): Router {
   const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);
 
   function flashAndRedirect(req: Request, res: Response, flash: AccountFlash) {
-    req.session.flash = flash as Record<string, unknown>;
+    setFlash(req, flash as Record<string, unknown>);
     res.redirect('/account');
   }
 
   router.get('/', async (req, res) => {
     const user = await db.getUserById(req.session.userId!);
     const invites = await db.listInviteCodesCreatedBy(req.session.userId!);
-    const flash = (req.session.flash ?? {}) as AccountFlash;
-    delete req.session.flash;
+    const flash = popFlash<AccountFlash>(req);
     res.render('account', {
       user,
       invites,

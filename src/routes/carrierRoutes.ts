@@ -1,6 +1,12 @@
 import express, { Router } from 'express';
 import { requireAuth } from '../middleware/auth';
+import { setFlash, popFlash } from '../utils/flash';
 import type { Driver } from '../db/driver';
+
+interface FormFlash {
+  error?: string;
+  formValues?: Record<string, unknown>;
+}
 
 export default function carrierRoutes(db: Driver): Router {
   const router = express.Router();
@@ -12,7 +18,12 @@ export default function carrierRoutes(db: Driver): Router {
   });
 
   router.get('/new', (req, res) => {
-    res.render('carriers/form', { carrier: {}, error: null, isEdit: false });
+    const flash = popFlash<FormFlash>(req);
+    res.render('carriers/form', {
+      carrier: flash.formValues ?? {},
+      error: flash.error ?? null,
+      isEdit: false,
+    });
   });
 
   router.get('/search', async (req, res) => {
@@ -34,7 +45,11 @@ export default function carrierRoutes(db: Driver): Router {
   router.post('/', async (req, res) => {
     const { name, iataCode, icaoCode, notes } = req.body;
     if (!name || !name.trim()) {
-      res.render('carriers/form', { carrier: req.body, error: 'Name is required.', isEdit: false });
+      setFlash(req, {
+        error: 'Name is required.',
+        formValues: { name, iata_code: iataCode, icao_code: icaoCode, notes },
+      });
+      res.redirect('/carriers/new');
       return;
     }
     await db.createCarrier(req.session.userId!, { name: name.trim(), iataCode, icaoCode, notes });
@@ -51,17 +66,22 @@ export default function carrierRoutes(db: Driver): Router {
       res.status(403).send('Default carriers cannot be edited - add your own instead.');
       return;
     }
-    res.render('carriers/form', { carrier, error: null, isEdit: true });
+    const flash = popFlash<FormFlash>(req);
+    res.render('carriers/form', {
+      carrier: flash.formValues ?? carrier,
+      error: flash.error ?? null,
+      isEdit: true,
+    });
   });
 
   router.post('/:id', async (req, res) => {
     const { name, iataCode, icaoCode, notes } = req.body;
     if (!name || !name.trim()) {
-      res.render('carriers/form', {
-        carrier: { ...req.body, id: req.params.id },
+      setFlash(req, {
         error: 'Name is required.',
-        isEdit: true,
+        formValues: { id: req.params.id, name, iata_code: iataCode, icao_code: icaoCode, notes },
       });
+      res.redirect(`/carriers/${req.params.id}/edit`);
       return;
     }
     await db.updateCarrier(req.params.id, req.session.userId!, {
