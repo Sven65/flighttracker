@@ -75,6 +75,19 @@ async function main(): Promise<void> {
   app.use(ensureCsrfToken);
   app.use(verifyCsrfToken);
   app.use(attachUser(db));
+  app.use((req, res, next) => {
+    // req.hostname is proxy-aware but always strips the port, which breaks
+    // direct access on a non-standard port (no proxy in front, or testing
+    // against the raw :3000). Prefer X-Forwarded-Host (has the real public
+    // host+port a proxy is fronting) only when we actually trust it; the
+    // raw Host header otherwise, which correctly keeps the port for direct access.
+    const forwardedHost = trustProxy ? req.headers['x-forwarded-host'] : undefined;
+    const rawForwardedHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost;
+    const host = rawForwardedHost?.split(',')[0].trim() || req.get('host');
+    res.locals.siteUrl = `${req.protocol}://${host}`;
+    res.locals.originalUrl = req.originalUrl;
+    next();
+  });
 
   app.use('/', authRoutes(db));
   app.use('/flights', flightRoutes(db));

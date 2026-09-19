@@ -5,7 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Opts out of Dark Reader et al. - the app has its own light/dark mode already. -->
   <meta name="darkreader-lock">
-  <title><%= typeof title !== 'undefined' ? title + ' · Flighttracker' : 'Flighttracker' %></title>
+
+  <% var pageTitle = typeof title !== 'undefined' ? title + ' · Flighttracker' : 'Flighttracker' %>
+  <% var pageDescription = 'A personal flight logbook - track flights, carriers, aircraft, and stats.' %>
+  <title><%= pageTitle %></title>
+  <meta name="description" content="<%= pageDescription %>">
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Flighttracker">
+  <meta property="og:title" content="<%= pageTitle %>">
+  <meta property="og:description" content="<%= pageDescription %>">
+  <meta property="og:url" content="<%= siteUrl %><%= originalUrl %>">
+  <meta property="og:image" content="<%= siteUrl %>/images/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= pageTitle %>">
+  <meta name="twitter:description" content="<%= pageDescription %>">
+  <meta name="twitter:image" content="<%= siteUrl %>/images/og-image.png">
+
   <link rel="stylesheet" href="/css/style.css">
   <% if (typeof extraHead !== 'undefined') { %><%- extraHead %><% } %>
 </head>

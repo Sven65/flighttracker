@@ -117,6 +117,11 @@ locally under `public/vendor/fonts/` rather than pulled from Google
 Fonts, same reasoning as vendoring Leaflet - no external dependency for
 the app to render correctly.
 
+Favicon and social-preview image (`public/favicon.svg`, `public/images/og-image.png`)
+match the same palette. `og:url`/`og:image` are built from the request
+at runtime (`req.protocol` + `req.hostname`), not a hardcoded domain,
+so link previews resolve correctly wherever you actually deploy this.
+
 ## Flight-number lookup (optional)
 
 Set `AERODATABOX_API_KEY` to add a "look up" button on the flight form
@@ -150,6 +155,33 @@ see `src/db/schema.sql` for exact columns.
 default. `pnpm-workspace.yaml` already allowlists both. Add any new
 native dependency there too, or `pnpm install` will fail with
 `ERR_PNPM_IGNORED_BUILDS`.
+
+## Deploying without Docker
+
+`flighttracker.service` is a systemd unit for running this directly on
+a Linux box - no container.
+
+1. Get Node 22+ and pnpm on the machine, and the usual native-build
+   tools for `better-sqlite3` (`sudo apt install python3 make g++` on
+   Debian/Ubuntu).
+2. Clone the repo somewhere like `/opt/flighttracker`.
+3. `pnpm install` (needs devDependencies for the build step below -
+   don't use `--prod` yet).
+4. `cp .env.example .env` and edit it - a real `SESSION_SECRET`,
+   `TRUST_PROXY=true` if a reverse proxy sits in front.
+5. `pnpm build`.
+6. Create a dedicated user so this isn't running as root:
+   `sudo useradd --system --no-create-home --shell /usr/sbin/nologin flighttracker`
+7. `sudo chown -R flighttracker:flighttracker /opt/flighttracker` -
+   the service needs write access to `data/`.
+8. Copy `flighttracker.service` to `/etc/systemd/system/`, adjusting
+   `WorkingDirectory` and the `ExecStart` node path (`which node`) if
+   they don't match.
+9. `sudo systemctl daemon-reload && sudo systemctl enable --now flighttracker`
+10. `sudo systemctl status flighttracker` to confirm it's up,
+    `journalctl -u flighttracker -f` for logs.
+
+Updating later: `git pull && pnpm install && pnpm build && sudo systemctl restart flighttracker`.
 
 ## License
 
